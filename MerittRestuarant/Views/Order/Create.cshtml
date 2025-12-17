@@ -14,7 +14,7 @@
                     <img class="card-img-top fixed-image-height" src="@product.ImageUrl" alt="@product.Description" />
                     <div class="card-body">
                         @product.Name - @product.Price.ToString("C")
-                        <input type="hidden" name="productId" value="@product.ProductId" />
+                        <input type="hidden" name="prodId" value="@product.ProductId" />
                         <input type="number" name="prodQty" class="form-control" />
                         <button type="submit" class="btn btn-primary mt-2">Add to Order</button>
                     </div>

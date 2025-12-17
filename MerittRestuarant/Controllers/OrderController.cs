@@ -33,5 +33,54 @@ namespace MerittRestuarant.Controllers
 
             return View(model);
         }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> AddItem(int prodId, int prodQty)
+        {
+            var product = await _context.Products.FindAsync(prodId);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel") ?? new OrderViewModel
+            {
+                OrderItems = new List<OrderItemViewModel>(),
+                Products = await _menuItemRepository.GetAllAsync()
+            };
+
+            var existingItem = model.OrderItems.FirstOrDefault(oi => oi.ProductId == prodId);
+            if (existingItem != null)
+            {
+                existingItem.Quantity += prodQty;
+            }
+            else
+            {
+                model.OrderItems.Add(new OrderItemViewModel
+                {
+                    ProductId = product.ProductId,
+                    ProductName = product.Name,
+                    Price = product.Price,
+                    Quantity = prodQty
+                });
+            }
+
+            model.TotalPrice = model.OrderItems.Sum(oi => oi.Price * oi.Quantity);
+            HttpContext.Session.Set("OrderViewModel", model);
+
+            return RedirectToAction("Create", model);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Cart() { 
+            var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
+            if (model == null || model.OrderItems.Count == 0)
+            {
+                return RedirectToAction("Create");
+            }
+            return View(model);
+        }
     }
 }
