@@ -1,7 +1,7 @@
 ﻿@model OrderViewModel
 <h1>Your Cart</h1>
 
-<form asp-action="PlaceOrder" method="post">
+<form asp-action="SubmitOrder" method="post">
     <h3>Items in your cart:</h3>
     <table class="table table-bordered">
         <thead>
@@ -31,7 +31,7 @@
         </tbody>
     </table>
     <div class="form-group">
-        <input type="submit" value="Place Order" class="btn btn-primary" />
+        <input type="submit" value="Submit Order" class="btn btn-primary" />
     </div>
 </form>
 

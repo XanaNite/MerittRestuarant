@@ -74,13 +74,60 @@ namespace MerittRestuarant.Controllers
 
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> Cart() { 
+        public async Task<IActionResult> Cart()
+        {
             var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
             if (model == null || model.OrderItems.Count == 0)
             {
                 return RedirectToAction("Create");
             }
             return View(model);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> SubmitOrder()
+        {
+            var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
+            if (model == null || model.OrderItems.Count == 0)
+            {
+                return RedirectToAction("Create");
+            }
+
+            Order order = new Order
+            {
+                OrderDate = DateTime.Now,
+                TotalAmount = model.TotalPrice,
+                UserId = _userManager.GetUserId(User)
+            };
+
+            foreach (var item in model.OrderItems)
+            {
+                order.OrderItems.Add(new OrderItem
+                {
+                    ProductId = item.ProductId,
+                    Quantity = item.Quantity,
+                    Price = item.Price
+                });
+            }
+
+            await _orderRepository.AddAsync(order);
+            HttpContext.Session.Remove("OrderViewModel");
+            return RedirectToAction("ViewOrders");
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> ViewOrders()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var orders = await _orderRepository.GetAllByIdAsync(userId, "UserId", new QueryOptions<Order> 
+            { 
+                Includes = "OrderItems.Product"
+            });
+
+            return View(orders);
         }
     }
 }

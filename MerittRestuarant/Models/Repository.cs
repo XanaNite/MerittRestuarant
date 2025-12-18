@@ -14,9 +14,10 @@ namespace MerittRestuarant.Models
             _dbSet = _context.Set<T>();
         }
 
-        public Task AddAsync(T entity)
+        public async Task AddAsync(T entity)
         {
-            throw new NotImplementedException();
+            await _dbSet.AddAsync(entity);
+            await _context.SaveChangesAsync();
         }
 
         public Task DeleteAsync(T entity)
@@ -59,6 +60,30 @@ namespace MerittRestuarant.Models
             string primaryKeyName = keyProperty.Name;
 
             return await query.FirstOrDefaultAsync(e => EF.Property<int>(e, primaryKeyName) == id);
+        }
+
+        public async Task<IEnumerable<T>> GetAllByIdAsync<TKey>(TKey id, string propertyName, QueryOptions<T> options)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (options.HasWhere)
+            {
+                query = query.Where(options.Where);
+            }
+
+            if (options.HasOrderBy)
+            {
+                query = query.OrderBy(options.OrderBy);
+            }
+
+            foreach(string include in options.GetIncludes())
+            {
+                query = query.Include(include);
+            }
+
+            query = query.Where(e => EF.Property<TKey>(e, propertyName).Equals(id));
+
+            return await query.ToListAsync();
         }
 
         public Task UpdateAsync(T entity)
