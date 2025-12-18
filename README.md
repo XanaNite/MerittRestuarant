@@ -24,6 +24,7 @@ Project Management Tools: Jira, Confluence, Lucidchart
 To run this project locally, ensure you have the .NET SDK installed.
 
 Update the database:
+
 Run the following command in the Package Manager Console to create the database based on the code-first models:
 
 ```
